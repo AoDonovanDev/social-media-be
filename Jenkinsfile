@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                     sh "docker build -t be_test .";
-                    sh "docker tag be_test:latest aodonovan/social-media-be-docker-repo:latest";
+                    sh "docker tag be_test:latest aliamfrager/revature-project-2-be:latest";
                     sh "echo ${DOCKER_CREDENTIALS_PSW}| docker login --username ${DOCKER_CREDENTIALS_USR} --password-stdin"
                     sh "docker push aodonovan/social-media-be-docker-repo:latest"
                 }
