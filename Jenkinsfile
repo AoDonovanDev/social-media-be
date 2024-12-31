@@ -2,11 +2,10 @@ pipeline {
     agent any
     
     environment {
-        AWS_DEFAULT_REGION = 'us-east-2'
-        AWS_ACCOUNT_ID = '339713008166'
         IMAGE_TAG = 'new-sm-img-22time'
 	    DOCKER_CREDENTIALS = credentials('docker-credentials')
         ENV_PROPERTIES_FILE = credentials('env-properties')
+        BACKEND_EC2_SSH_KEY = credentials('backend-ec2-ssh-key')
        
     }
 
@@ -46,7 +45,7 @@ pipeline {
         stage('Remote into docker runner ec2, pull and run image') {
             steps {
                 script {
-                    sh "ssh -i /ec2-user/var/Jenkins/docker-container-instance-key.pem ec2-user@ec2-3-143-226-151.us-east-2.compute.amazonaws.com -y";
+                    sh "ssh -i ${BACKEND_EC2_SSH_KEY} ec2-user@ec2-3-137-181-232.us-east-2.compute.amazonaws.com -y";
                     sh "sudo docker image pull aodonovan/social-media-be-docker-repo:latest";
                     sh "docker run -d aodonovan/social-media-be-docker-repo";
                     sh "exit"
