@@ -1,8 +1,5 @@
 package com.bitsu.social_media.dto;
 
-import com.bitsu.social_media.model.Comment;
-import com.bitsu.social_media.model.Reaction;
-import com.bitsu.social_media.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

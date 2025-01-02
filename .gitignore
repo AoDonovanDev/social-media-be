@@ -36,4 +36,5 @@ env.properties
 .env
 env.properties
 PEM_FILE.pem
+.DS_Store
 /target

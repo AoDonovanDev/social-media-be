@@ -52,7 +52,7 @@ public class AuthService {
         var user = userRepo.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException(request.getUsername()));
 
-        Map<String, Object> extraClaims = new HashMap();
+        Map<String, Object> extraClaims = new HashMap<String, Object>();
         extraClaims.put("id", Integer.toString(user.getId()));
         extraClaims.put("profilePicture", user.getProfilePicture());
         extraClaims.put("bio", user.getBio());

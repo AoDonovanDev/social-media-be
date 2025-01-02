@@ -32,11 +32,15 @@ public class Post {
     @ManyToOne
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(
+            fetch = FetchType.LAZY, cascade = CascadeType.ALL
+    )
     @JoinColumn(name = "post_id")
     private List<Comment> comments;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(
+            fetch = FetchType.LAZY, cascade = CascadeType.ALL
+    )
     @JoinColumn(name = "post_id")
     private List<Reaction> reactions;
     

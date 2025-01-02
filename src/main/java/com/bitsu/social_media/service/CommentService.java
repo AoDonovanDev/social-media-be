@@ -7,7 +7,6 @@ import com.bitsu.social_media.model.Post;
 import com.bitsu.social_media.model.User;
 import com.bitsu.social_media.repository.CommentRepo;
 import com.bitsu.social_media.repository.PostRepo;
-import com.bitsu.social_media.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentService {
     private final UserService userService;
-    private final UserRepo userRepo;
     private final CommentRepo commentRepo;
     private final PostRepo postRepo;
     public List<CommentResponse> getComments() {
