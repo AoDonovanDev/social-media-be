@@ -6,6 +6,7 @@ import com.bitsu.social_media.model.Post;
 import com.bitsu.social_media.model.User;
 import com.bitsu.social_media.repository.PostRepo;
 import com.bitsu.social_media.repository.ReactionRepo;
+import com.bitsu.social_media.utility.Utility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,6 +27,9 @@ class PostServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private Utility utility;
 
     @Mock
     private CommentService commentService;
@@ -56,7 +60,7 @@ class PostServiceTest {
         post.setMediaURL("http://media.url");
         post.setUser(user);
 
-        when(userService.getLoggedInUser()).thenReturn(user);
+        when(utility.getLoggedInUser()).thenReturn(user);
         when(postRepo.save(any(Post.class))).thenReturn(post);
 
         PostResponse response = postService.createPost(request);

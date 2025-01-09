@@ -8,6 +8,7 @@ import com.bitsu.social_media.model.Reaction;
 import com.bitsu.social_media.model.User;
 import com.bitsu.social_media.repository.PostRepo;
 import com.bitsu.social_media.repository.ReactionRepo;
+import com.bitsu.social_media.utility.Utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,81 +26,69 @@ public class PostService {
     private final CommentService commentService;
     private final ReactionRepo reactionRepo;
     private final S3Service s3Service;
+    private final Utility utility;
 
     public List<PostResponse> getPosts(String search) {
         if (search == null || search.isBlank()) {
             return postRepo.findAllByOrderByCreatedAtDesc().stream()
-                    .map(this::mapToPostResponse)
+                    .map(utility::mapToPostResponse)
                     .toList();
         }
 
         return postRepo.findAllByContentContains(search).stream()
-                .map(this::mapToPostResponse)
+                .map(utility::mapToPostResponse)
+                .toList();
+    }
+
+    public List<PostResponse> getFeed(String search) {
+        if (search == null || search.isBlank()) {
+            return postRepo.findPostsByFollowing(utility.getLoggedInUser().getFollowing().stream().map(user -> user.getId()).toList())
+                    .stream()
+                    .map(utility::mapToPostResponse)
+                    .toList();
+        }
+
+        return postRepo.findPostsByFollowing(utility.getLoggedInUser().getFollowing().stream().map(user -> user.getId()).toList())
+                .stream()
+                .filter(post -> post.getContent().contains(search))
+                .map(utility::mapToPostResponse)
                 .toList();
     }
 
 
-    public PostResponse mapToPostResponse(Post post) {
-
-        List<Comment> comments = post.getComments();
-        List<Reaction> reactions = post.getReactions();
-        if (comments == null) {
-            comments = List.of();
-        }
-        if (reactions == null) {
-            reactions = List.of();
-        }
-
-        return PostResponse.builder()
-                .Id(post.getId())
-                .content(post.getContent())
-                .mediaURL(post.getMediaURL())
-                .createdAt(post.getCreatedAt())
-                .user(
-                        userService.mapToUserResponse(
-                                post.getUser()
-                        )
-                )
-                .comments(
-                        comments.stream().map(commentService::mapToCommentResponse).toList()
-                )
-                .reactions(
-                        reactions.stream().map(reaction -> reaction.getUser().getId()).toList()
-                )
-                .build();
-    }
 
     public PostResponse createPost(PostRequest postRequest) {
 
-        User user = userService.getLoggedInUser();
+        User user = utility.getLoggedInUser();
 
         Post post = Post.builder()
                 .content(postRequest.getContent())
                 .mediaURL(postRequest.getMediaURL())
                 .user(user)
                 .build();
-        return mapToPostResponse(postRepo.save(post));
+        return utility.mapToPostResponse(postRepo.save(post));
     }
 
     public void deletePost(int id) {
         log.info("Delete: " + id);
         Post post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-        boolean imageDeleted = s3Service.deleteImageFromBucket(post.getMediaURL());
-        if (imageDeleted) {
-            postRepo.delete(post);
+        if (post.getMediaURL() != null && !post.getMediaURL().isBlank()) {
+            s3Service.deleteImageFromBucket(post.getMediaURL());
         }
+        postRepo.delete(post);
     }
 
     public PostResponse updatePost(int id, PostRequest postRequest) {
         Post post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
         post.setContent(postRequest.getContent());
         post.setMediaURL(postRequest.getMediaURL());
-        return mapToPostResponse(postRepo.save(post));
+        return utility.mapToPostResponse(postRepo.save(post));
     }
 
     public void deleteReactions(int postId) {
-        User user = userService.getLoggedInUser();
-        Reaction reaction = reactionRepo.findByPostIdAndUserId(postId, user.getId()).orElseThrow(() -> new RuntimeException("Reaction not found"));
+        User user = utility.getLoggedInUser();
+        Reaction reaction = reactionRepo.findByPostIdAndUserId(postId, user.getId())
+                .orElseThrow(() -> new RuntimeException("Reaction not found"));
         reactionRepo.delete(reaction);
     }
 }

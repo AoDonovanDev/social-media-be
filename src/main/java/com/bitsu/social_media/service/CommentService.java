@@ -7,6 +7,7 @@ import com.bitsu.social_media.model.Post;
 import com.bitsu.social_media.model.User;
 import com.bitsu.social_media.repository.CommentRepo;
 import com.bitsu.social_media.repository.PostRepo;
+import com.bitsu.social_media.utility.Utility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,24 +19,14 @@ public class CommentService {
     private final UserService userService;
     private final CommentRepo commentRepo;
     private final PostRepo postRepo;
+    private final Utility utility;
     public List<CommentResponse> getComments() {
-        return commentRepo.findAll().stream()
-                .map(this::mapToCommentResponse)
+        return commentRepo.findAllByOrderByCreatedAtDesc().stream()
+                .map(utility::mapToCommentResponse)
                 .toList();
     }
 
-    public CommentResponse mapToCommentResponse(Comment comment) {
-        return CommentResponse.builder()
-                .Id(comment.getId())
-                .content(comment.getContent())
-                .createdAt(comment.getCreatedAt())
-                .user(
-                        userService.mapToUserResponse(
-                                comment.getUser()
-                        )
-                )
-                .build();
-    }
+
 
 //    public PostCommentResponse mapToPostCommentResponse(Comment comment) {
 //        return PostCommentResponse.builder()
@@ -45,7 +36,7 @@ public class CommentService {
 //                .build();
 //    }
     public CommentResponse createComment(CommentRequest commentRequest) {
-        User user = userService.getLoggedInUser();
+        User user = utility.getLoggedInUser();
 
         Post post = postRepo.findById(commentRequest.getPostId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -56,7 +47,7 @@ public class CommentService {
                 .post(post)
                 .build();
         comment = commentRepo.save(comment);
-        return mapToCommentResponse(comment);
+        return utility.mapToCommentResponse(comment);
     }
 
     public void deleteComment(int id) {
@@ -70,6 +61,6 @@ public class CommentService {
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
         comment.setContent(commentRequest.getContent());
         comment = commentRepo.save(comment);
-        return mapToCommentResponse(comment);
+        return utility.mapToCommentResponse(comment);
     }
 }

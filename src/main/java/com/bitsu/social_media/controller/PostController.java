@@ -29,6 +29,14 @@ public class PostController {
         return ResponseEntity.ok(postService.getPosts(search));
     }
 
+    @GetMapping("/feed")
+    public ResponseEntity<List<PostResponse>> getFeed(
+            @RequestParam String search
+    ) {
+        log.info("Get: ");
+        return ResponseEntity.ok(postService.getFeed(search));
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PostResponse> createPost(

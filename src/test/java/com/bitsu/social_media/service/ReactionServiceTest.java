@@ -8,6 +8,7 @@ import com.bitsu.social_media.model.ReactionType;
 import com.bitsu.social_media.model.User;
 import com.bitsu.social_media.repository.PostRepo;
 import com.bitsu.social_media.repository.ReactionRepo;
+import com.bitsu.social_media.utility.Utility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -28,6 +29,9 @@ class ReactionServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private Utility utility;
 
     @Mock
     private PostRepo postRepo;
@@ -58,7 +62,7 @@ class ReactionServiceTest {
         reaction.setUser(user);
         reaction.setPost(post);
 
-        when(userService.getLoggedInUser()).thenReturn(user);
+        when(utility.getLoggedInUser()).thenReturn(user);
         when(postRepo.findById(anyInt())).thenReturn(Optional.of(post));
         when(reactionRepo.save(any(Reaction.class))).thenReturn(reaction);
 

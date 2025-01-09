@@ -3,6 +3,7 @@ package com.bitsu.social_media.service;
 import java.net.URL;
 import java.time.Duration;
 
+import com.bitsu.social_media.utility.Utility;
 import org.springframework.stereotype.Service;
 
 import com.bitsu.social_media.dto.S3PresignedURLResponse;
@@ -20,12 +21,12 @@ public class S3Service {
 
     private final S3Presigner s3Presigner;
     private final S3Client s3Client;
-    private final UserService userService;
+    private final Utility utility;
     private final String bucketName = "revature-project-2-bucket";
     private final String mediaBaseURL = "https://" + bucketName + ".s3.us-east-2.amazonaws.com/";
 
     public S3PresignedURLResponse generatePresignedUrl(String fileName, String contentType) {
-        User user = userService.getLoggedInUser();
+        User user = utility.getLoggedInUser();
         String uniqueKey = user.getId() + "-" + System.currentTimeMillis() + "-" + fileName;
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(b -> b
                 .putObjectRequest(PutObjectRequest.builder()

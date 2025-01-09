@@ -33,13 +33,13 @@ public class Post {
     private User user;
 
     @OneToMany(
-            fetch = FetchType.LAZY, cascade = CascadeType.ALL
+            fetch = FetchType.LAZY, cascade = CascadeType.REMOVE
     )
     @JoinColumn(name = "post_id")
     private List<Comment> comments;
 
     @OneToMany(
-            fetch = FetchType.LAZY, cascade = CascadeType.ALL
+            fetch = FetchType.LAZY, cascade = CascadeType.REMOVE
     )
     @JoinColumn(name = "post_id")
     private List<Reaction> reactions;

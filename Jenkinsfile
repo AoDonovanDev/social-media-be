@@ -48,10 +48,10 @@ pipeline {
                     withCredentials([sshUserPrivateKey(credentialsId: 'backend-ec2-ssh-key', keyFileVariable: 'ssh_private_key', usernameVariable: 'ssh_username')]) {
                         sh 'chmod 600 ${ssh_private_key}'
                         sh '''
-			    ssh -o StrictHostKeyChecking=no -i ${ssh_private_key} ${ssh_username}@ec2-3-137-181-232.us-east-2.compute.amazonaws.com -y 'container_id=$(docker ps -q --filter "ancestor=liamfrager/revature-project-2-be:latest" --filter "publish=80") && [ ! -z "$container_id" ] && docker stop $container_id && docker rm $container_id'
+			    ssh -o StrictHostKeyChecking=no -i ${ssh_private_key} ${ssh_username}@ec2-3-137-181-232.us-east-2.compute.amazonaws.com -y 'docker ps --filter "name=^be$" --format "{{.Names}}" | grep -q "^be$" && docker stop be && docker rm be || echo "No container named 'be' is running."'
 			'''
 		    	sh 'ssh -o StrictHostKeyChecking=no -i ${ssh_private_key} ${ssh_username}@ec2-3-137-181-232.us-east-2.compute.amazonaws.com -y "docker pull --platform linux/amd64 liamfrager/revature-project-2-be:latest"'
-                        sh 'ssh -o StrictHostKeyChecking=no -i ${ssh_private_key} ${ssh_username}@ec2-3-137-181-232.us-east-2.compute.amazonaws.com -y "docker run --platform linux/amd64 -p 80:8080 -d -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} -e SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL} -e SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME} -e SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD} liamfrager/revature-project-2-be"'
+                        sh 'ssh -o StrictHostKeyChecking=no -i ${ssh_private_key} ${ssh_username}@ec2-3-137-181-232.us-east-2.compute.amazonaws.com -y "docker run --name be --platform linux/amd64 -p 80:8080 -d -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} -e SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL} -e SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME} -e SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD} liamfrager/revature-project-2-be"'
                     }
                 }
             }

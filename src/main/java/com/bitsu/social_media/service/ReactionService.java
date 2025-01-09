@@ -6,6 +6,7 @@ import com.bitsu.social_media.dto.ReactionResponse;
 import com.bitsu.social_media.model.Reaction;
 import com.bitsu.social_media.repository.PostRepo;
 import com.bitsu.social_media.repository.ReactionRepo;
+import com.bitsu.social_media.utility.Utility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ public class ReactionService {
     private final ReactionRepo reactionRepo;
     private final UserService userService;
     private final PostRepo postRepo;
+    private final Utility utility;
 
     public List<ReactionResponse> getReactions() {
         return reactionRepo.findAll().stream()
@@ -29,7 +31,7 @@ public class ReactionService {
                 .id(reaction.getId())
                 .type(reaction.getType())
                 .userResponse(
-                        userService.mapToUserResponse(reaction.getUser())
+                        utility.mapToUserResponse(reaction.getUser())
                 )
                 .build();
     }
@@ -48,7 +50,7 @@ public class ReactionService {
 
         Reaction reaction = Reaction.builder()
                 .type(reactionRequest.getType())
-                .user(userService.getLoggedInUser())
+                .user(utility.getLoggedInUser())
                 .post(post)
                 .build();
 

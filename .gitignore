@@ -2,7 +2,7 @@ HELP.md
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-env.properties
+src/main/resources/env.properties
 
 ### STS ###
 .apt_generated
@@ -31,10 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
-env.properties
+src/main/resources/env.properties
 .env.*
 .env
-env.properties
+src/main/resources/env.properties
 PEM_FILE.pem
 .DS_Store
 /target

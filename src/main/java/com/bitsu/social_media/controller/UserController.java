@@ -4,6 +4,7 @@ package com.bitsu.social_media.controller;
 import com.bitsu.social_media.dto.UserBioInfo;
 import com.bitsu.social_media.dto.UserPIInfo;
 import com.bitsu.social_media.dto.UserProfilePic;
+import com.bitsu.social_media.dto.UserProfileResponse;
 import com.bitsu.social_media.dto.UserResponse;
 import com.bitsu.social_media.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +30,26 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsers(search));
     }
 
+    @GetMapping("/{username}")
+    public ResponseEntity<UserProfileResponse> getUser(
+            @PathVariable String username
+    ) {
+        var user = userService.getUser(username);
+        return ResponseEntity.ok(user);
+    }
+
     @GetMapping("following")
     public ResponseEntity<List<UserResponse>> getFollowing(
             @RequestParam String search
     ) {
         return ResponseEntity.ok(userService.getFollowing(search));
+    }
+
+    @GetMapping("followers")
+    public ResponseEntity<List<UserResponse>> getFollowers(
+            @RequestParam String search
+    ) {
+        return ResponseEntity.ok(userService.getFollowers(search));
     }
 
     @PutMapping("/PI")

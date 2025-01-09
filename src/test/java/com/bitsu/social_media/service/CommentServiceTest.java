@@ -7,6 +7,7 @@ import com.bitsu.social_media.model.User;
 import com.bitsu.social_media.repository.CommentRepo;
 import com.bitsu.social_media.repository.PostRepo;
 import com.bitsu.social_media.repository.UserRepo;
+import com.bitsu.social_media.utility.Utility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,6 +27,9 @@ public class CommentServiceTest {
 
     @Mock
     private UserRepo userRepo;
+
+    @Mock
+    private Utility utility;
 
     @Mock
     private CommentRepo commentRepo;
@@ -59,7 +63,7 @@ public class CommentServiceTest {
         comment.setUser(user);
         comment.setPost(post);
 
-        when(userService.getLoggedInUser()).thenReturn(user);
+        when(utility.getLoggedInUser()).thenReturn(user);
         when(postRepo.findById(anyInt())).thenReturn(Optional.of(post));
         when(commentRepo.save(any(Comment.class))).thenReturn(comment);
 
