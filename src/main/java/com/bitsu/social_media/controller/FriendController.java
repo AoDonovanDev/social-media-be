@@ -4,6 +4,7 @@ package com.bitsu.social_media.controller;
 import com.bitsu.social_media.dto.FriendDTO;
 import com.bitsu.social_media.dto.FriendRequestDTO;
 import com.bitsu.social_media.service.FriendService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,9 @@ public class FriendController {
 
     // Send a friend request
     @PostMapping("/{id}")
-    public ResponseEntity<Void> addFriend(@PathVariable int id) {
+    public ResponseEntity<Void> addFriend(
+           @PathVariable int id
+    ) {
         log.info("Sending friend request to user with ID: {}", id);
         friendService.addFriend(id);
         return ResponseEntity.ok().build();
@@ -30,7 +33,9 @@ public class FriendController {
 
     // Accept a friend request
     @PutMapping("/requests/{requestId}/accept")
-    public ResponseEntity<Void> acceptFriendRequest(@PathVariable int requestId) {
+    public ResponseEntity<Void> acceptFriendRequest(
+           @PathVariable int requestId
+    ) {
         log.info("Accepting friend request with ID: {}", requestId);
         friendService.acceptFriendRequest(requestId);
         return ResponseEntity.ok().build();
@@ -38,7 +43,9 @@ public class FriendController {
 
     // Decline a friend request
     @PutMapping("/requests/{requestId}/decline")
-    public ResponseEntity<Void> declineFriendRequest(@PathVariable int requestId) {
+    public ResponseEntity<Void> declineFriendRequest(
+            @PathVariable int requestId
+    ) {
         log.info("Declining friend request with ID: {}", requestId);
         friendService.declineFriendRequest(requestId);
         return ResponseEntity.ok().build();
@@ -46,7 +53,9 @@ public class FriendController {
 
     // Unfriend a user
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> unfriend(@PathVariable int id) {
+    public ResponseEntity<Void> unfriend(
+            @PathVariable int id
+    ) {
         log.info("Unfriending user with ID: {}", id);
         friendService.unfriend(id);
         return ResponseEntity.ok().build();
@@ -62,7 +71,9 @@ public class FriendController {
 
     // Check if two users are friends
     @GetMapping("/is-friend/{userId}")
-    public ResponseEntity<Boolean> isFriend(@PathVariable int userId) {
+    public ResponseEntity<Boolean> isFriend(
+            @PathVariable int userId
+    ) {
         log.info("Checking friendship status with user ID: {}", userId);
         boolean isFriend = friendService.isFriend(userId);
         return ResponseEntity.ok(isFriend);

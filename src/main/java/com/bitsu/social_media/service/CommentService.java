@@ -2,6 +2,7 @@ package com.bitsu.social_media.service;
 
 import com.bitsu.social_media.dto.CommentRequest;
 import com.bitsu.social_media.dto.CommentResponse;
+import com.bitsu.social_media.exception.NotFoundException;
 import com.bitsu.social_media.model.Comment;
 import com.bitsu.social_media.model.Post;
 import com.bitsu.social_media.model.User;
@@ -39,7 +40,7 @@ public class CommentService {
         User user = utility.getLoggedInUser();
 
         Post post = postRepo.findById(commentRequest.getPostId())
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new NotFoundException("Post not found"));
 
         var comment = Comment.builder()
                 .content(commentRequest.getContent())
@@ -52,13 +53,13 @@ public class CommentService {
 
     public void deleteComment(int id) {
         var comment = commentRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new NotFoundException("Comment not found"));
         commentRepo.delete(comment);
     }
 
     public CommentResponse updateComment(int id, CommentRequest commentRequest) {
         var comment = commentRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new NotFoundException("Comment not found"));
         comment.setContent(commentRequest.getContent());
         comment = commentRepo.save(comment);
         return utility.mapToCommentResponse(comment);

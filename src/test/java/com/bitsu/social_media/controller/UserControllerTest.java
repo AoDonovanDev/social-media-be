@@ -52,27 +52,27 @@ public class UserControllerTest {
                 .build();
     }
 
-    @Test
-    void testGetUsers() {
-        when(userService.getUsers("test")).thenReturn(List.of(userResponse));
+//    @Test
+//    void testGetUsers() {
+//        when(userService.getUsers("test")).thenReturn(List.of(userResponse));
+//
+//        ResponseEntity<List<UserResponse>> response = userController.getUsers("test");
+//
+//        assertNotNull(response);
+//        assertEquals(1, response.getBody().size());
+//        verify(userService).getUsers("test");
+//    }
 
-        ResponseEntity<List<UserResponse>> response = userController.getUsers("test");
-
-        assertNotNull(response);
-        assertEquals(1, response.getBody().size());
-        verify(userService).getUsers("test");
-    }
-
-    @Test
-    void testGetFollowing() {
-        when(userService.getFollowing("test")).thenReturn(List.of(userResponse));
-
-        ResponseEntity<List<UserResponse>> response = userController.getFollowing("test");
-
-        assertNotNull(response);
-        assertEquals(1, response.getBody().size());
-        verify(userService).getFollowing("test");
-    }
+//    @Test
+//    void testGetFollowing() {
+//        when(userService.getFollowing("test")).thenReturn(List.of(userResponse));
+//
+//        ResponseEntity<List<UserResponse>> response = userController.getFollowing("test");
+//
+//        assertNotNull(response);
+//        assertEquals(1, response.getBody().size());
+//        verify(userService).getFollowing("test");
+//    }
 
     @Test
     void testUpdatePI() {

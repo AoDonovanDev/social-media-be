@@ -1,16 +1,17 @@
 package com.bitsu.social_media.service;
 
-import com.bitsu.social_media.dto.UserBioInfo;
-import com.bitsu.social_media.dto.UserPIInfo;
-import com.bitsu.social_media.dto.UserProfilePic;
-import com.bitsu.social_media.dto.UserProfileResponse;
-import com.bitsu.social_media.dto.UserResponse;
+import com.bitsu.social_media.dto.*;
+import com.bitsu.social_media.exception.NotFoundException;
 import com.bitsu.social_media.model.Post;
 import com.bitsu.social_media.model.User;
 import com.bitsu.social_media.repository.UserRepo;
 import com.bitsu.social_media.utility.Utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -47,7 +48,7 @@ public class UserService {
     }
 
     public UserProfileResponse getUser(String username) {
-        User user = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
         List<Post> posts = user.getPosts();
         Collections.reverse(posts);
         return UserProfileResponse.builder()
@@ -61,52 +62,108 @@ public class UserService {
             .build();
     }
 
-    public List<UserResponse> getUsers(String search) {
+    public PagedUser getUsers(String search, int page, int size, String sortBy, boolean ascending) {
+        var loggedInUser = utility.getLoggedInUser();
+
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
         if (search == null || search.isBlank()) {
-            return userRepo.findAll().stream()
-                    .map(utility::mapToUserResponse)
-                    .toList();
+            var usersPageable = userRepo.findAllByUsernameNot(loggedInUser.getUsername(), pageable);
+            return PagedUser.builder()
+                    .users(usersPageable.getContent().stream().map(utility::mapToUserResponse).toList())
+                    .hasNext(usersPageable.hasNext())
+                    .currentPage(usersPageable.getNumber())
+                    .totalPages(usersPageable.getTotalPages())
+                    .size(usersPageable.getSize())
+                    .build();
         }
-        return userRepo.findAllByUsernameContains(search).stream()
-                .map(utility::mapToUserResponse)
-                .toList();
+        var usersPageable = userRepo.findAllByUsernameContainsAndUsernameNot(search, loggedInUser.getUsername(), pageable);
+        return PagedUser.builder()
+                .users(usersPageable.getContent().stream().map(utility::mapToUserResponse).toList())
+                .hasNext(usersPageable.hasNext())
+                .currentPage(usersPageable.getNumber())
+                .totalPages(usersPageable.getTotalPages())
+                .size(usersPageable.getSize())
+                .build();
     }
 
-    public List<UserResponse> getFollowing(String search) {
+    public PagedUser getFollowing(String search, int page, int size, String sortBy, boolean ascending) {
+
+        var loggedInUser = utility.getLoggedInUser();
+
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
         if (search == null || search.isBlank()) {
-            return utility.getLoggedInUser().getFollowing().stream()
-                    .map(utility::mapToUserResponse)
-                    .toList();
+            var usersPageable = userRepo.findAllFollowingUser(loggedInUser, pageable);
+            return PagedUser.builder()
+                    .users(usersPageable.getContent().stream().map(utility::mapToUserResponse).toList())
+                    .hasNext(usersPageable.hasNext())
+                    .currentPage(usersPageable.getNumber())
+                    .totalPages(usersPageable.getTotalPages())
+                    .size(usersPageable.getSize())
+                    .build();
         }
-        return utility.getLoggedInUser().getFollowing().stream()
-                .filter(user -> user.getUsername().contains(search))
-                .map(utility::mapToUserResponse)
-                .toList();
+        var usersPageable = userRepo.findAllByFollowingAndUsernameContains(loggedInUser, search, pageable);
+        return PagedUser.builder()
+                .users(usersPageable.getContent().stream().map(utility::mapToUserResponse).toList())
+                .hasNext(usersPageable.hasNext())
+                .currentPage(usersPageable.getNumber())
+                .totalPages(usersPageable.getTotalPages())
+                .size(usersPageable.getSize())
+                .build();
     }
 
-    public List<UserResponse> getFollowers(String search) {
+    public PagedUser getFollowers(String search, int page, int size, String sortBy, boolean ascending) {
+
+        var loggedInUser = utility.getLoggedInUser();
+
+        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
         if (search == null || search.isBlank()) {
-            return userRepo.findFollowers(utility.getLoggedInUser().getId()).stream()
-                .map(utility::mapToUserResponse)
-                .toList();
+
+            var usersPageable = userRepo.findFollowers(loggedInUser.getId(), pageable);
+            return PagedUser.builder()
+                    .users(usersPageable.getContent().stream().map(utility::mapToUserResponse).toList())
+                    .hasNext(usersPageable.hasNext())
+                    .currentPage(usersPageable.getNumber())
+                    .totalPages(usersPageable.getTotalPages())
+                    .size(usersPageable.getSize())
+                    .build();
         }
-        return userRepo.findFollowers(utility.getLoggedInUser().getId()).stream()
-                .filter(user -> user.getUsername().contains(search))
-                .map(utility::mapToUserResponse)
-                .toList();
+
+        var usersPageable = userRepo.findFollowers(loggedInUser.getId(), search, pageable);
+        return PagedUser.builder()
+                .users(usersPageable.getContent().stream().map(utility::mapToUserResponse).toList())
+                .hasNext(usersPageable.hasNext())
+                .currentPage(usersPageable.getNumber())
+                .totalPages(usersPageable.getTotalPages())
+                .size(usersPageable.getSize())
+                .build();
     }
 
     public void unfollow(int id) {
+        log.info("here");
         User user = utility.getLoggedInUser();
-        User userToUnfollow = userRepo.findById(id).orElseThrow(() -> new RuntimeException("User to unfollow not found"));
+        User userToUnfollow = userRepo.findById(id).orElseThrow(() -> new NotFoundException("User to unfollow not found"));
         user.getFollowing().remove(userToUnfollow);
         userRepo.save(user);
     }
 
     public void follow(int id) {
         User user = utility.getLoggedInUser();
-        User userToFollow = userRepo.findById(id).orElseThrow(() -> new RuntimeException("User to follow not found"));
+        User userToFollow = userRepo.findById(id).orElseThrow(() -> new NotFoundException("User to follow not found"));
         user.getFollowing().add(userToFollow);
         userRepo.save(user);
+    }
+
+    public boolean checkFollowing(int id) {
+        User user = utility.getLoggedInUser();
+        User userToCheck = userRepo.findById(id).orElseThrow(() -> new NotFoundException("User to check not found"));
+        var res = user.getFollowing().contains(userToCheck);
+        log.info("Following: " + res);
+        return res;
     }
 }

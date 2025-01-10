@@ -3,6 +3,8 @@ package com.bitsu.social_media.controller;
 import com.bitsu.social_media.dto.CommentRequest;
 import com.bitsu.social_media.dto.CommentResponse;
 import com.bitsu.social_media.service.CommentService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +30,7 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<CommentResponse> createComment(
-            @RequestBody CommentRequest commentRequest
+            @Valid @RequestBody CommentRequest commentRequest
     ) {
         log.error("Create: " + commentRequest);
         return ResponseEntity.ok(commentService.createComment(commentRequest));
@@ -46,7 +48,7 @@ public class CommentController {
     @PutMapping("/{id}")
     public ResponseEntity<CommentResponse> updateComment(
             @PathVariable int id,
-            @RequestBody CommentRequest commentRequest
+            @Valid @RequestBody CommentRequest commentRequest
     ) {
         log.error("Update: " + id + " " + commentRequest);
         return ResponseEntity.ok(commentService.updateComment(id, commentRequest));

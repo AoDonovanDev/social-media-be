@@ -3,6 +3,7 @@ package com.bitsu.social_media.controller;
 import com.bitsu.social_media.dto.ReactionRequest;
 import com.bitsu.social_media.dto.ReactionResponse;
 import com.bitsu.social_media.service.ReactionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class ReactionController {
 
     @PostMapping
     public ResponseEntity<ReactionResponse> createReaction(
-            @RequestBody ReactionRequest reactionRequest
+            @Valid @RequestBody ReactionRequest reactionRequest
     ) {
         return ResponseEntity.ok(reactionService.createReaction(reactionRequest));
     }

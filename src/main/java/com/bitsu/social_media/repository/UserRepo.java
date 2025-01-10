@@ -1,6 +1,8 @@
 package com.bitsu.social_media.repository;
 
 import com.bitsu.social_media.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,8 +15,18 @@ import java.util.Optional;
 public interface UserRepo extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
 
-    List<User> findAllByUsernameContains(String search);
+    Page<User> findAllByUsernameContainsAndUsernameNot(String search, String username, Pageable pageable);
+
+    Page<User> findAllByUsernameNot(String username, Pageable pageable);
+
+    @Query("SELECT u.following FROM User u WHERE u = :user")
+    Page<User> findAllFollowingUser(User user, Pageable pageable);
+
+    Page<User> findAllByFollowingAndUsernameContains(User user, String search, Pageable pageable);
 
     @Query("SELECT u FROM User u JOIN u.following f WHERE f.id = :currentUserID")
-    List<User> findFollowers(@Param("currentUserID") int currentUserID);
+    Page<User> findFollowers(@Param("currentUserID") int currentUserID, Pageable pageable);
+
+    @Query("SELECT u FROM User u JOIN u.following f WHERE f.id = :currentUserID AND u.username LIKE %:search%")
+    Page<User> findFollowers(@Param("currentUserID") int currentUserID, @Param("search") String search, Pageable pageable);
 }

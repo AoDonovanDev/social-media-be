@@ -3,6 +3,7 @@ package com.bitsu.social_media.service;
 
 import com.bitsu.social_media.dto.ReactionRequest;
 import com.bitsu.social_media.dto.ReactionResponse;
+import com.bitsu.social_media.exception.NotFoundException;
 import com.bitsu.social_media.model.Reaction;
 import com.bitsu.social_media.repository.PostRepo;
 import com.bitsu.social_media.repository.ReactionRepo;
@@ -46,7 +47,7 @@ public class ReactionService {
 
     public ReactionResponse createReaction(ReactionRequest reactionRequest) {
         var post = postRepo.findById(reactionRequest.getPostId())
-                .orElseThrow(() -> new RuntimeException("Post not found"));
+                .orElseThrow(() -> new NotFoundException("Post not found"));
 
         Reaction reaction = Reaction.builder()
                 .type(reactionRequest.getType())
@@ -60,14 +61,14 @@ public class ReactionService {
 
     public void deleteReaction(int id) {
         var reaction = reactionRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reaction not found"));
+                .orElseThrow(() -> new NotFoundException("Reaction not found"));
 
         reactionRepo.delete(reaction);
     }
 
     public ReactionResponse updateReaction(int id, ReactionRequest reactionRequest) {
         var reaction = reactionRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reaction not found"));
+                .orElseThrow(() -> new NotFoundException("Reaction not found"));
 
             reaction.setType(reactionRequest.getType());
 

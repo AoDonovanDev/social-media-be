@@ -1,12 +1,10 @@
 package com.bitsu.social_media.controller;
 
 
-import com.bitsu.social_media.dto.UserBioInfo;
-import com.bitsu.social_media.dto.UserPIInfo;
-import com.bitsu.social_media.dto.UserProfilePic;
-import com.bitsu.social_media.dto.UserProfileResponse;
-import com.bitsu.social_media.dto.UserResponse;
+import com.bitsu.social_media.dto.*;
 import com.bitsu.social_media.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +22,15 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getUsers(
-            @RequestParam String search
+    public ResponseEntity<PagedUser> getUsers(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "username") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
     ) {
-        return ResponseEntity.ok(userService.getUsers(search));
+        var result = userService.getUsers(search, page, size, sortBy, ascending);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{username}")
@@ -39,35 +42,50 @@ public class UserController {
     }
 
     @GetMapping("following")
-    public ResponseEntity<List<UserResponse>> getFollowing(
-            @RequestParam String search
+    public ResponseEntity<PagedUser> getFollowing(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "username") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
+
     ) {
-        return ResponseEntity.ok(userService.getFollowing(search));
+        return ResponseEntity.ok(userService.getFollowing(search, page, size, sortBy, ascending));
     }
 
     @GetMapping("followers")
-    public ResponseEntity<List<UserResponse>> getFollowers(
-            @RequestParam String search
+    public ResponseEntity<PagedUser> getFollowers(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "username") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
     ) {
-        return ResponseEntity.ok(userService.getFollowers(search));
+        return ResponseEntity.ok(userService.getFollowers(search, page, size, sortBy, ascending));
     }
 
     @PutMapping("/PI")
-    public void updatePI(@RequestBody UserPIInfo userPIInfo) {
+    public void updatePI(
+            @Valid @RequestBody UserPIInfo userPIInfo
+    ) {
         log.error("Update: " + userPIInfo);
-        userService.updatePI (userPIInfo);
+        userService.updatePI(userPIInfo);
         ResponseEntity.ok();
     }
 
     @PutMapping("/bio")
-    public void updateBio(@RequestBody UserBioInfo userBioInfo) {
+    public void updateBio(
+            @Valid @RequestBody UserBioInfo userBioInfo
+    ) {
         log.error("Update: " + userBioInfo);
         userService.updateBio(userBioInfo);
         ResponseEntity.ok();
     }
 
     @PutMapping("/profilePic")
-    public void updateProfilePic(@RequestBody UserProfilePic userProfilePic) {
+    public void updateProfilePic(
+            @Valid @RequestBody UserProfilePic userProfilePic
+    ) {
         log.error("Update: " + userProfilePic);
         userService.updateProfilePic(userProfilePic);
         ResponseEntity.ok();
@@ -83,5 +101,10 @@ public class UserController {
     public void follow(@PathVariable int id) {
         userService.follow(id);
         ResponseEntity.ok();
+    }
+
+    @GetMapping("/following/check/{id}")
+    public ResponseEntity<Boolean> checkFollowing(@PathVariable int id) {
+        return ResponseEntity.ok(userService.checkFollowing(id));
     }
 }

@@ -2,7 +2,7 @@ package com.bitsu.social_media.service;
 
 import com.bitsu.social_media.dto.PostRequest;
 import com.bitsu.social_media.dto.PostResponse;
-import com.bitsu.social_media.model.Comment;
+import com.bitsu.social_media.exception.NotFoundException;
 import com.bitsu.social_media.model.Post;
 import com.bitsu.social_media.model.Reaction;
 import com.bitsu.social_media.model.User;
@@ -35,7 +35,7 @@ public class PostService {
                     .toList();
         }
 
-        return postRepo.findAllByContentContains(search).stream()
+        return postRepo.findPostsBySearchTerm(search).stream()
                 .map(utility::mapToPostResponse)
                 .toList();
     }
@@ -50,7 +50,7 @@ public class PostService {
 
         return postRepo.findPostsByFollowing(utility.getLoggedInUser().getFollowing().stream().map(user -> user.getId()).toList())
                 .stream()
-                .filter(post -> post.getContent().contains(search))
+                .filter(post -> (post.getContent().toLowerCase().contains(search.toLowerCase()) || post.getUser().getUsername().toLowerCase().contains(search.toLowerCase())))
                 .map(utility::mapToPostResponse)
                 .toList();
     }
@@ -71,7 +71,7 @@ public class PostService {
 
     public void deletePost(int id) {
         log.info("Delete: " + id);
-        Post post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepo.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
         if (post.getMediaURL() != null && !post.getMediaURL().isBlank()) {
             s3Service.deleteImageFromBucket(post.getMediaURL());
         }
@@ -79,7 +79,7 @@ public class PostService {
     }
 
     public PostResponse updatePost(int id, PostRequest postRequest) {
-        Post post = postRepo.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepo.findById(id).orElseThrow(() -> new NotFoundException("Post not found"));
         post.setContent(postRequest.getContent());
         post.setMediaURL(postRequest.getMediaURL());
         return utility.mapToPostResponse(postRepo.save(post));
@@ -88,7 +88,7 @@ public class PostService {
     public void deleteReactions(int postId) {
         User user = utility.getLoggedInUser();
         Reaction reaction = reactionRepo.findByPostIdAndUserId(postId, user.getId())
-                .orElseThrow(() -> new RuntimeException("Reaction not found"));
+                .orElseThrow(() -> new NotFoundException("Reaction not found"));
         reactionRepo.delete(reaction);
     }
 }

@@ -25,11 +25,19 @@ public class User implements UserDetails {
     private int id;
 
     @Column(
-            unique = true
+            unique = true,
+            nullable = false,
+            length = 20
     )
     private String username;
 
+    @Column(
+            length = 20
+    )
     private String firstname;
+    @Column(
+            length = 20
+    )
     private String lastname;
     private String password;
     private String profilePicture;

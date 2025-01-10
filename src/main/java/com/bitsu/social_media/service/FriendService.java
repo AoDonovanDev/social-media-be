@@ -3,6 +3,10 @@ package com.bitsu.social_media.service;
 
 import com.bitsu.social_media.dto.FriendDTO;
 import com.bitsu.social_media.dto.FriendRequestDTO;
+import com.bitsu.social_media.exception.AlreadyFriendsException;
+import com.bitsu.social_media.exception.FriendRequestExistsException;
+import com.bitsu.social_media.exception.NotFoundException;
+import com.bitsu.social_media.exception.SelfFriendRequestException;
 import com.bitsu.social_media.model.Friend;
 import com.bitsu.social_media.model.FriendRequest;
 import com.bitsu.social_media.model.FriendRequestStatus;
@@ -32,11 +36,11 @@ public class FriendService {
     public void addFriend(int id) {
         User user = utility.getLoggedInUser();
         User userToFriend = userRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("User to friend not found"));
+                .orElseThrow(() -> new NotFoundException("User to friend not found"));
 
         // Prevent sending a friend request to yourself
         if (user.getId() == userToFriend.getId()) {
-            throw new IllegalStateException("You cannot send a friend request to yourself.");
+            throw new SelfFriendRequestException("You cannot send a friend request to yourself.");
         }
 
         // Check if a friend request already exists in either direction
@@ -44,12 +48,12 @@ public class FriendService {
                 || friendRequestRepository.existsBySenderIdAndReceiverId(userToFriend.getId(), user.getId());
 
         if (requestExists) {
-            throw new IllegalStateException("A friend request already exists between these users.");
+            throw new FriendRequestExistsException("A friend request already exists between these users.");
         }
 
         // Check if they are already friends
         if (friendRepository.existsByUserIdAndFriendId(user.getId(), userToFriend.getId())) {
-            throw new IllegalStateException("You are already friends with this user.");
+            throw new AlreadyFriendsException("You are already friends with this user.");
         }
 
         // Create a new friend request
@@ -66,7 +70,7 @@ public class FriendService {
     public void acceptFriendRequest(int requestId) {
         User user = utility.getLoggedInUser();
         FriendRequest request = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Friend request not found."));
+                .orElseThrow(() -> new NotFoundException("Friend request not found."));
 
         if (request.getReceiver().getId() != (user.getId())) {
             throw new RuntimeException("Unauthorized.");
@@ -89,7 +93,7 @@ public class FriendService {
     public void declineFriendRequest(int requestId) {
         User user = utility.getLoggedInUser();
         FriendRequest request = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Friend request not found."));
+                .orElseThrow(() -> new NotFoundException("Friend request not found."));
 
         if (request.getReceiver().getId() != (user.getId())) {
             throw new RuntimeException("Unauthorized.");
@@ -103,7 +107,7 @@ public class FriendService {
     @Transactional
     public void unfriend(int id) {
         User user = utility.getLoggedInUser();
-        User friend = userRepo.findById(id).orElseThrow(() -> new RuntimeException("User to unfriend not found"));
+        User friend = userRepo.findById(id).orElseThrow(() -> new NotFoundException("User to unfriend not found"));
 
         friendRepository.deleteByUserIdAndFriendId(user.getId(), friend.getId());
         friendRepository.deleteByUserIdAndFriendId(friend.getId(), user.getId());

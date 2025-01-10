@@ -15,7 +15,8 @@ public interface PostRepo extends JpaRepository<Post, Integer>{
 
     public List<Post> findAllByOrderByCreatedAtDesc();
 
-    public List<Post> findAllByContentContains(String search);
+    @Query("SELECT p FROM Post p WHERE LOWER(p.content) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR LOWER(p.user.username) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    List<Post> findPostsBySearchTerm(@Param("searchTerm") String searchTerm);
 
     @Query("SELECT p FROM Post p WHERE p.user.id IN :following")
     List<Post> findPostsByFollowing(@Param("following") List<Integer> following);

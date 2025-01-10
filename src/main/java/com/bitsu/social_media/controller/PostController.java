@@ -3,6 +3,8 @@ package com.bitsu.social_media.controller;
 import com.bitsu.social_media.dto.PostRequest;
 import com.bitsu.social_media.dto.PostResponse;
 import com.bitsu.social_media.service.PostService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,7 +25,7 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<List<PostResponse>> getPosts(
-            @RequestParam String search
+            @RequestParam(required = false) String search
     ) {
         log.info("Get: ");
         return ResponseEntity.ok(postService.getPosts(search));
@@ -31,7 +33,7 @@ public class PostController {
 
     @GetMapping("/feed")
     public ResponseEntity<List<PostResponse>> getFeed(
-            @RequestParam String search
+            @RequestParam(required = false) String search
     ) {
         log.info("Get: ");
         return ResponseEntity.ok(postService.getFeed(search));
@@ -40,7 +42,7 @@ public class PostController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PostResponse> createPost(
-            @RequestBody PostRequest postRequest
+            @Valid @RequestBody PostRequest postRequest
     ) {
         log.info("Create: " + postRequest);
         return ResponseEntity.ok(postService.createPost(postRequest));
@@ -59,7 +61,7 @@ public class PostController {
     @PutMapping("/{id}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable int id,
-            @RequestBody PostRequest postRequest
+            @Valid @RequestBody PostRequest postRequest
     ) {
         log.info("Update: " + id + " " + postRequest);
         return ResponseEntity.ok(postService.updatePost(id, postRequest));
